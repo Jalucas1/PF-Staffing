@@ -49,7 +49,28 @@ function getWeekDates(weekOffset: number) {
 }
 
 function formatTime(time: string) {
-  return time.slice(0, 5);
+  const [hours, minutes] = time.split(":");
+
+  const date = new Date();
+  date.setHours(Number(hours));
+  date.setMinutes(Number(minutes));
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function formatHour(hour: string) {
+  const date = new Date();
+  date.setHours(Number(hour));
+  date.setMinutes(0);
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    hour12: true,
+  });
 }
 
 export default function SchedulePage() {
@@ -250,7 +271,7 @@ export default function SchedulePage() {
                 className="grid grid-cols-[90px_repeat(7,1fr)] border-b border-slate-100 last:border-b-0"
               >
                 <div className="bg-slate-50 p-4 text-sm font-medium text-slate-500">
-                  {hour}:00
+                  {formatHour(hour)}
                 </div>
 
                 {days.map((day) => {
