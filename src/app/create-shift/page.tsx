@@ -128,15 +128,21 @@ export default function CreateShiftPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Role</label>
-              <input
-                type="text"
-                placeholder="Front Desk, Manager, Closing..."
+              <label className="text-sm font-medium text-slate-700">
+                Role
+              </label>
+              <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required
                 className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              />
+              >
+                <option value="">Select role</option>
+                <option value="Front Desk">Front Desk</option>
+                <option value="Overnight">Overnight</option>
+                <option value="Opener">Opener</option>
+                <option value="Closer">Closer</option>
+              </select>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
