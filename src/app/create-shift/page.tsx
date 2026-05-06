@@ -140,6 +140,7 @@ export default function CreateShiftPage() {
                 <option value="">Select role</option>
                 <option value="Front Desk">Front Desk</option>
                 <option value="Overnight">Overnight</option>
+                <option value="Closer">Manager</option>
                 <option value="Opener">Opener</option>
                 <option value="Closer">Closer</option>
               </select>
