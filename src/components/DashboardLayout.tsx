@@ -105,6 +105,7 @@ export default function DashboardLayout({
             key={item.href}
             href={item.href}
             className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white"
+            onClick={() => setMobileMenuOpen(false)}
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
               <Icon size={18} />
@@ -136,7 +137,9 @@ export default function DashboardLayout({
 
           {navLinks}
 
-          <LogoutButton />
+          <div className="mt-8">
+            <LogoutButton />
+          </div>
         </aside>
 
         {/* Mobile Sidebar */}
@@ -188,7 +191,9 @@ export default function DashboardLayout({
                   {isAdmin ? "Super User" : "Employee"}
                 </p>
 
-                <LogoutButton />
+                <div className="mt-4">
+                  <LogoutButton />
+                </div>
               </div>
             </aside>
           </div>
@@ -200,9 +205,9 @@ export default function DashboardLayout({
             {/* Mobile Header */}
             <div className="sticky top-0 z-40 -mx-4 mb-6 border-b border-slate-200 bg-slate-50/90 px-4 py-4 backdrop-blur md:hidden">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                    <Sparkles size={17} />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
+                    <Sparkles size={18} />
                   </div>
 
                   <div>
@@ -216,9 +221,11 @@ export default function DashboardLayout({
                   </div>
                 </div>
 
+                {/* ALWAYS visible */}
                 <button
+                  type="button"
                   onClick={() => setMobileMenuOpen(true)}
-                  className="rounded-2xl border border-slate-200 bg-white p-3 text-slate-700 shadow-sm active:scale-95"
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition active:scale-95"
                 >
                   <Menu size={20} />
                 </button>

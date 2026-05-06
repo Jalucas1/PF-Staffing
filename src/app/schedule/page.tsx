@@ -41,6 +41,7 @@ function getWeekDates(weekOffset: number) {
 
     return {
       name: date.toLocaleDateString("en-US", { weekday: "long" }),
+      shortName: date.toLocaleDateString("en-US", { weekday: "short" }),
       date,
       isoDate: formatLocalDate(date),
     };
@@ -88,7 +89,7 @@ export default function SchedulePage() {
     <ProtectedRoute>
       <DashboardLayout
         title="Weekly Schedule"
-        subtitle="24-hour calendar view of all staff shifts."
+        subtitle="View all staff shifts for the selected week."
       >
         {error && (
           <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-600">
@@ -96,50 +97,119 @@ export default function SchedulePage() {
           </p>
         )}
 
-        <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">
-              {days[0].date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}{" "}
-              –{" "}
-              {days[6].date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </p>
-            <p className="text-xs text-slate-500">
-              Use the controls to review previous or upcoming schedules.
-            </p>
-          </div>
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">
+                {days[0].date.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                –{" "}
+                {days[6].date.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => setWeekOffset((current) => current - 1)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Previous Week
-            </button>
+              <p className="text-xs text-slate-500">
+                Use the controls to review previous or upcoming schedules.
+              </p>
+            </div>
 
-            <button
-              onClick={() => setWeekOffset(0)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              This Week
-            </button>
+            <div className="grid grid-cols-3 gap-2 md:flex">
+              <button
+                onClick={() => setWeekOffset((current) => current - 1)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 md:px-4 md:text-sm"
+              >
+                Previous
+              </button>
 
-            <button
-              onClick={() => setWeekOffset((current) => current + 1)}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              Next Week
-            </button>
+              <button
+                onClick={() => setWeekOffset(0)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 md:px-4 md:text-sm"
+              >
+                This Week
+              </button>
+
+              <button
+                onClick={() => setWeekOffset((current) => current + 1)}
+                className="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700 md:px-4 md:text-sm"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* Mobile schedule list */}
+        <div className="space-y-4 md:hidden">
+          {days.map((day) => {
+            const dayShifts = shifts.filter(
+              (shift) => shift.shift_date === day.isoDate
+            );
+
+            return (
+              <section
+                key={day.isoDate}
+                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-base font-bold text-slate-900">
+                      {day.name}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {day.date.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                    {dayShifts.length} shift{dayShifts.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                {dayShifts.length === 0 ? (
+                  <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+                    No shifts scheduled.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {dayShifts.map((shift) => (
+                      <div
+                        key={shift.id}
+                        className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-slate-900">
+                              {shift.employee_name}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {shift.role}
+                            </p>
+                          </div>
+
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700">
+                            {formatTime(shift.start_time)} –{" "}
+                            {formatTime(shift.end_time)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+
+        {/* Desktop/tablet calendar grid */}
+        <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
           <div className="min-w-[1200px]">
             <div className="grid grid-cols-[90px_repeat(7,1fr)] border-b border-slate-200 bg-slate-50">
               <div className="p-4 text-sm font-semibold text-slate-500">
