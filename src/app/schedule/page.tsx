@@ -121,21 +121,33 @@ export default function SchedulePage() {
             <div className="grid grid-cols-3 gap-2 md:flex">
               <button
                 onClick={() => setWeekOffset((current) => current - 1)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 md:px-4 md:text-sm"
+                className={`rounded-xl px-3 py-2 text-xs font-medium md:px-4 md:text-sm ${
+                  weekOffset < 0
+                    ? "bg-indigo-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
               >
                 Previous
               </button>
 
               <button
                 onClick={() => setWeekOffset(0)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 md:px-4 md:text-sm"
+                className={`rounded-xl px-3 py-2 text-xs font-medium md:px-4 md:text-sm ${
+                  weekOffset === 0
+                    ? "bg-indigo-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
               >
                 This Week
               </button>
 
               <button
                 onClick={() => setWeekOffset((current) => current + 1)}
-                className="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700 md:px-4 md:text-sm"
+                className={`rounded-xl px-3 py-2 text-xs font-medium md:px-4 md:text-sm ${
+                  weekOffset > 0
+                    ? "bg-indigo-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
               >
                 Next
               </button>
