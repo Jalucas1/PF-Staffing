@@ -17,6 +17,7 @@ export default function AlertsPage() {
   const supabase = createClient();
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({
     title: "",
@@ -38,6 +39,22 @@ export default function AlertsPage() {
     }
 
     setAlerts(data || []);
+  }
+
+  async function loadUserRole() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.user) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+
+    setIsAdmin(profile?.role === "super_user");
   }
 
   function startEditing(alert: Alert) {
@@ -101,6 +118,7 @@ export default function AlertsPage() {
 
   useEffect(() => {
     loadAlerts();
+    loadUserRole();
   }, []);
 
   function getPriorityStyles(priority: string) {
@@ -121,7 +139,7 @@ export default function AlertsPage() {
           </p>
         )}
 
-        {success && (
+        {success && isAdmin && (
           <p className="mb-4 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
             {success}
           </p>
@@ -141,7 +159,7 @@ export default function AlertsPage() {
                   key={alert.id}
                   className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
                 >
-                  {isEditing ? (
+                  {isEditing && isAdmin ? (
                     <div className="space-y-4">
                       <input
                         type="text"
@@ -222,21 +240,23 @@ export default function AlertsPage() {
                           {new Date(alert.created_at).toLocaleString()}
                         </p>
 
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => startEditing(alert)}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
-                          >
-                            Edit
-                          </button>
+                        {isAdmin && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditing(alert)}
+                              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                            >
+                              Edit
+                            </button>
 
-                          <button
-                            onClick={() => deleteAlert(alert.id)}
-                            className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                            <button
+                              onClick={() => deleteAlert(alert.id)}
+                              className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
