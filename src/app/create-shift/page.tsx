@@ -13,7 +13,10 @@ type Profile = {
 
 function getDayName(dateString: string) {
   const date = new Date(`${dateString}T00:00:00`);
-  return date.toLocaleDateString("en-US", { weekday: "long" });
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+  });
 }
 
 export default function CreateShiftPage() {
@@ -43,8 +46,9 @@ export default function CreateShiftPage() {
     setEmployees(data || []);
   }
 
-  async function createShift(e: any) {
+  async function createShift(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     setError("");
     setSuccess("");
 
@@ -67,6 +71,7 @@ export default function CreateShiftPage() {
     setShiftDate("");
     setStartTime("");
     setEndTime("");
+
     setSuccess("Shift created successfully.");
   }
 
@@ -78,36 +83,41 @@ export default function CreateShiftPage() {
     <ProtectedRoute requireAdmin>
       <DashboardLayout
         title="Create Shift"
-        subtitle="Add a new employee shift to a specific date."
+        subtitle="Add a new employee shift to the weekly schedule."
         roleLabel="Super User"
       >
         {error && (
-          <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+          <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
             {error}
-          </p>
+          </div>
         )}
 
         {success && (
-          <p className="mb-4 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
+          <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-700">
             {success}
-          </p>
+          </div>
         )}
 
-        <div className="max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <form onSubmit={createShift} className="space-y-4">
+        <div className="max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <form onSubmit={createShift} className="space-y-5">
             <div>
               <label className="text-sm font-medium text-slate-700">
                 Employee
               </label>
+
               <select
                 value={employeeName}
                 onChange={(e) => setEmployeeName(e.target.value)}
                 required
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
               >
                 <option value="">Select employee</option>
+
                 {employees.map((employee) => (
-                  <option key={employee.id} value={employee.full_name}>
+                  <option
+                    key={employee.id}
+                    value={employee.full_name}
+                  >
                     {employee.full_name}
                   </option>
                 ))}
@@ -116,14 +126,15 @@ export default function CreateShiftPage() {
 
             <div>
               <label className="text-sm font-medium text-slate-700">
-                Shift date
+                Shift Date
               </label>
+
               <input
                 type="date"
                 value={shiftDate}
                 onChange={(e) => setShiftDate(e.target.value)}
                 required
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
 
@@ -131,52 +142,55 @@ export default function CreateShiftPage() {
               <label className="text-sm font-medium text-slate-700">
                 Role
               </label>
+
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required
-                className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
               >
                 <option value="">Select role</option>
                 <option value="Front Desk">Front Desk</option>
                 <option value="Overnight">Overnight</option>
-                <option value="Closer">Manager</option>
                 <option value="Opener">Opener</option>
                 <option value="Closer">Closer</option>
+                <option value="Manager">Manager</option>
               </select>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="text-sm font-medium text-slate-700">
-                  Start time
+                  Start Time
                 </label>
+
                 <input
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
 
               <div>
                 <label className="text-sm font-medium text-slate-700">
-                  End time
+                  End Time
                 </label>
+
                 <input
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   required
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+              className="w-full rounded-2xl bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.99]"
             >
               Create Shift
             </button>
