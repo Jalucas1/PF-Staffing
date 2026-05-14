@@ -52,6 +52,26 @@ export default function CreateShiftPage() {
     setError("");
     setSuccess("");
 
+    const { data: approvedTimeOff, error: timeOffError } = await supabase
+      .from("time_off_requests")
+      .select("*")
+      .eq("employee_name", employeeName)
+      .eq("status", "approved")
+      .lte("start_date", shiftDate)
+      .gte("end_date", shiftDate);
+
+    if (timeOffError) {
+      setError(timeOffError.message);
+      return;
+    }
+
+    if (approvedTimeOff && approvedTimeOff.length > 0) {
+      setError(
+        `${employeeName} has approved time off on this date and cannot be scheduled.`
+      );
+      return;
+    }
+
     const { error } = await supabase.from("shifts").insert({
       employee_name: employeeName,
       role,
@@ -114,10 +134,7 @@ export default function CreateShiftPage() {
                 <option value="">Select employee</option>
 
                 {employees.map((employee) => (
-                  <option
-                    key={employee.id}
-                    value={employee.full_name}
-                  >
+                  <option key={employee.id} value={employee.full_name}>
                     {employee.full_name}
                   </option>
                 ))}

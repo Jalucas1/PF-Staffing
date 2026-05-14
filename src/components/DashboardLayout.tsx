@@ -5,6 +5,7 @@ import {
   Bell,
   CalendarDays,
   ClipboardList,
+  Clock,
   LayoutDashboard,
   Menu,
   PlusCircle,
@@ -34,6 +35,11 @@ const navItems = [
     label: "My Shifts",
     href: "/my-shifts",
     icon: UserRound,
+  },
+  {
+    label: "Request Off",
+    href: "/request-off",
+    icon: Clock,
   },
   {
     label: "Alerts",
@@ -134,7 +140,6 @@ export default function DashboardLayout({
             </div>
 
             <p className="text-sm text-slate-400">PF Staff Schedule</p>
-
             <h2 className="text-xl font-bold text-white">Staff Scheduler</h2>
           </div>
 

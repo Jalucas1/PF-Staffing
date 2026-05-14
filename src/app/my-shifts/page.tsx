@@ -45,6 +45,17 @@ function formatDate(dateString: string) {
   });
 }
 
+function getCutoffDateString() {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 2);
+
+  const year = cutoffDate.getFullYear();
+  const month = String(cutoffDate.getMonth() + 1).padStart(2, "0");
+  const day = String(cutoffDate.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 export default function MyShiftsPage() {
   const supabase = createClient();
 
@@ -106,10 +117,13 @@ export default function MyShiftsPage() {
   }
 
   async function loadShifts(employeeName: string) {
+    const cutoffDateString = getCutoffDateString();
+
     const { data, error } = await supabase
       .from("shifts")
       .select("*")
       .eq("employee_name", employeeName)
+      .gte("shift_date", cutoffDateString)
       .order("shift_date", { ascending: true })
       .order("start_time", { ascending: true });
 
@@ -137,7 +151,7 @@ export default function MyShiftsPage() {
         subtitle={
           isAdmin
             ? "Select an employee to view their scheduled shifts."
-            : "View your upcoming scheduled shifts."
+            : "View your recent and upcoming scheduled shifts."
         }
         roleLabel={isAdmin ? "Super User" : "Staff Portal"}
       >
