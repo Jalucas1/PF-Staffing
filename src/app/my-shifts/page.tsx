@@ -20,6 +20,8 @@ type Shift = {
   shift_date: string;
   start_time: string;
   end_time: string;
+  break_start_time: string | null;
+  break_end_time: string | null;
 };
 
 function formatTime(time: string) {
@@ -43,6 +45,11 @@ function formatDate(dateString: string) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function formatBreak(start: string | null, end: string | null) {
+  if (!start || !end) return "No break listed";
+  return `${formatTime(start)} – ${formatTime(end)}`;
 }
 
 function getCutoffDateString() {
@@ -210,6 +217,14 @@ export default function MyShiftsPage() {
 
                     <p className="mt-1 text-sm text-slate-500">
                       {shift.role}
+                    </p>
+
+                    <p className="mt-1 text-sm text-slate-500">
+                      Break:{" "}
+                      {formatBreak(
+                        shift.break_start_time,
+                        shift.break_end_time
+                      )}
                     </p>
                   </div>
 

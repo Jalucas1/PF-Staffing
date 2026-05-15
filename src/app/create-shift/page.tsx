@@ -28,6 +28,8 @@ export default function CreateShiftPage() {
   const [shiftDate, setShiftDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [breakStartTime, setBreakStartTime] = useState("");
+  const [breakEndTime, setBreakEndTime] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -51,6 +53,11 @@ export default function CreateShiftPage() {
 
     setError("");
     setSuccess("");
+
+    if ((breakStartTime && !breakEndTime) || (!breakStartTime && breakEndTime)) {
+      setError("Please enter both break start and break end times.");
+      return;
+    }
 
     const { data: approvedTimeOff, error: timeOffError } = await supabase
       .from("time_off_requests")
@@ -79,6 +86,8 @@ export default function CreateShiftPage() {
       shift_day: getDayName(shiftDate),
       start_time: startTime,
       end_time: endTime,
+      break_start_time: breakStartTime || null,
+      break_end_time: breakEndTime || null,
     });
 
     if (error) {
@@ -91,6 +100,8 @@ export default function CreateShiftPage() {
     setShiftDate("");
     setStartTime("");
     setEndTime("");
+    setBreakStartTime("");
+    setBreakEndTime("");
 
     setSuccess("Shift created successfully.");
   }
@@ -132,7 +143,6 @@ export default function CreateShiftPage() {
                 className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
               >
                 <option value="">Select employee</option>
-
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.full_name}>
                     {employee.full_name}
@@ -156,9 +166,7 @@ export default function CreateShiftPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Role
-              </label>
+              <label className="text-sm font-medium text-slate-700">Role</label>
 
               <select
                 value={role}
@@ -202,6 +210,40 @@ export default function CreateShiftPage() {
                   required
                   className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="mb-3 text-sm font-semibold text-slate-900">
+                Break Time
+              </p>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Break Start
+                  </label>
+
+                  <input
+                    type="time"
+                    value={breakStartTime}
+                    onChange={(e) => setBreakStartTime(e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Break End
+                  </label>
+
+                  <input
+                    type="time"
+                    value={breakEndTime}
+                    onChange={(e) => setBreakEndTime(e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
               </div>
             </div>
 

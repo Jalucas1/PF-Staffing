@@ -13,15 +13,37 @@ type Shift = {
   shift_date: string;
   start_time: string;
   end_time: string;
+  break_start_time: string | null;
+  break_end_time: string | null;
 };
 
 function formatTime(time: string) {
+  const [hours, minutes] = time.split(":");
+
+  const date = new Date();
+  date.setHours(Number(hours));
+  date.setMinutes(Number(minutes));
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function formatInputTime(time: string | null) {
+  if (!time) return "";
   return time.slice(0, 5);
 }
 
 function getDayName(dateString: string) {
   const date = new Date(`${dateString}T00:00:00`);
   return date.toLocaleDateString("en-US", { weekday: "long" });
+}
+
+function formatBreak(start: string | null, end: string | null) {
+  if (!start || !end) return "No break listed";
+  return `${formatTime(start)} – ${formatTime(end)}`;
 }
 
 export default function ManageSchedulePage() {
@@ -35,6 +57,8 @@ export default function ManageSchedulePage() {
     shift_date: "",
     start_time: "",
     end_time: "",
+    break_start_time: "",
+    break_end_time: "",
   });
 
   const [error, setError] = useState("");
@@ -61,8 +85,10 @@ export default function ManageSchedulePage() {
       employee_name: shift.employee_name,
       role: shift.role,
       shift_date: shift.shift_date,
-      start_time: formatTime(shift.start_time),
-      end_time: formatTime(shift.end_time),
+      start_time: formatInputTime(shift.start_time),
+      end_time: formatInputTime(shift.end_time),
+      break_start_time: formatInputTime(shift.break_start_time),
+      break_end_time: formatInputTime(shift.break_end_time),
     });
   }
 
@@ -74,12 +100,22 @@ export default function ManageSchedulePage() {
       shift_date: "",
       start_time: "",
       end_time: "",
+      break_start_time: "",
+      break_end_time: "",
     });
   }
 
   async function saveEdit(id: number) {
     setError("");
     setSuccess("");
+
+    if (
+      (editForm.break_start_time && !editForm.break_end_time) ||
+      (!editForm.break_start_time && editForm.break_end_time)
+    ) {
+      setError("Please enter both break start and break end times.");
+      return;
+    }
 
     const { error } = await supabase
       .from("shifts")
@@ -90,6 +126,8 @@ export default function ManageSchedulePage() {
         shift_day: getDayName(editForm.shift_date),
         start_time: editForm.start_time,
         end_time: editForm.end_time,
+        break_start_time: editForm.break_start_time || null,
+        break_end_time: editForm.break_end_time || null,
       })
       .eq("id", id);
 
@@ -166,68 +204,152 @@ export default function ManageSchedulePage() {
                 return (
                   <div key={shift.id} className="p-6">
                     {isEditing ? (
-                      <div className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <input
-                            type="text"
-                            value={editForm.employee_name}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                employee_name: e.target.value,
-                              })
-                            }
-                            className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                          />
+                      <div className="space-y-5">
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                          <p className="mb-4 text-sm font-semibold text-slate-900">
+                            Employee & Role
+                          </p>
 
-                          <input
-                            type="text"
-                            value={editForm.role}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                role: e.target.value,
-                              })
-                            }
-                            className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                          />
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Employee Name
+                              </label>
+                              <input
+                                type="text"
+                                value={editForm.employee_name}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    employee_name: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              />
+                            </div>
 
-                          <input
-                            type="date"
-                            value={editForm.shift_date}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                shift_date: e.target.value,
-                              })
-                            }
-                            className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                          />
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Role
+                              </label>
+                              <select
+                                value={editForm.role}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    role: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              >
+                                <option value="Front Desk">Front Desk</option>
+                                <option value="Overnight">Overnight</option>
+                                <option value="Opener">Opener</option>
+                                <option value="Closer">Closer</option>
+                                <option value="Manager">Manager</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            <input
-                              type="time"
-                              value={editForm.start_time}
-                              onChange={(e) =>
-                                setEditForm({
-                                  ...editForm,
-                                  start_time: e.target.value,
-                                })
-                              }
-                              className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                            />
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                          <p className="mb-4 text-sm font-semibold text-slate-900">
+                            Shift Time
+                          </p>
 
-                            <input
-                              type="time"
-                              value={editForm.end_time}
-                              onChange={(e) =>
-                                setEditForm({
-                                  ...editForm,
-                                  end_time: e.target.value,
-                                })
-                              }
-                              className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                            />
+                          <div className="grid gap-4 md:grid-cols-3">
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Shift Date
+                              </label>
+                              <input
+                                type="date"
+                                value={editForm.shift_date}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    shift_date: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Shift Start Time
+                              </label>
+                              <input
+                                type="time"
+                                value={editForm.start_time}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    start_time: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Shift End Time
+                              </label>
+                              <input
+                                type="time"
+                                value={editForm.end_time}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    end_time: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                          <p className="mb-4 text-sm font-semibold text-slate-900">
+                            Break Time
+                          </p>
+
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Break Start Time
+                              </label>
+                              <input
+                                type="time"
+                                value={editForm.break_start_time}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    break_start_time: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium text-slate-700">
+                                Break End Time
+                              </label>
+                              <input
+                                type="time"
+                                value={editForm.break_end_time}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    break_end_time: e.target.value,
+                                  })
+                                }
+                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -255,6 +377,13 @@ export default function ManageSchedulePage() {
                           </p>
                           <p className="text-sm text-slate-500">
                             {shift.role}
+                          </p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            Break:{" "}
+                            {formatBreak(
+                              shift.break_start_time,
+                              shift.break_end_time
+                            )}
                           </p>
                         </div>
 

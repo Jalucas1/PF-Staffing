@@ -13,6 +13,8 @@ type Shift = {
   shift_date: string;
   start_time: string;
   end_time: string;
+  break_start_time: string | null;
+  break_end_time: string | null;
 };
 
 const hours = Array.from({ length: 24 }, (_, i) =>
@@ -71,6 +73,11 @@ function formatHour(hour: string) {
     hour: "numeric",
     hour12: true,
   });
+}
+
+function formatBreak(start: string | null, end: string | null) {
+  if (!start || !end) return "No break listed";
+  return `${formatTime(start)} – ${formatTime(end)}`;
 }
 
 export default function SchedulePage() {
@@ -176,7 +183,6 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* Mobile schedule list */}
         <div className="space-y-4 md:hidden">
           {days.map((day) => {
             const dayShifts = shifts.filter(
@@ -217,20 +223,30 @@ export default function SchedulePage() {
                         key={shift.id}
                         className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 shadow-sm"
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-semibold text-slate-900">
-                              {shift.employee_name}
-                            </p>
-                            <p className="mt-1 text-sm text-slate-500">
-                              {shift.role}
-                            </p>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-slate-900">
+                                {shift.employee_name}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-500">
+                                {shift.role}
+                              </p>
+                            </div>
+
+                            <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700">
+                              {formatTime(shift.start_time)} –{" "}
+                              {formatTime(shift.end_time)}
+                            </span>
                           </div>
 
-                          <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700">
-                            {formatTime(shift.start_time)} –{" "}
-                            {formatTime(shift.end_time)}
-                          </span>
+                          <p className="rounded-xl bg-white/70 px-3 py-2 text-xs font-medium text-slate-600">
+                            Break:{" "}
+                            {formatBreak(
+                              shift.break_start_time,
+                              shift.break_end_time
+                            )}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -241,7 +257,6 @@ export default function SchedulePage() {
           })}
         </div>
 
-        {/* Desktop/tablet calendar grid */}
         <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
           <div className="min-w-[1200px]">
             <div className="grid grid-cols-[90px_repeat(7,1fr)] border-b border-slate-200 bg-slate-50">
@@ -303,6 +318,14 @@ export default function SchedulePage() {
                             <p className="mt-3 rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-700">
                               {formatTime(shift.start_time)} –{" "}
                               {formatTime(shift.end_time)}
+                            </p>
+
+                            <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs font-medium text-slate-600">
+                              Break:{" "}
+                              {formatBreak(
+                                shift.break_start_time,
+                                shift.break_end_time
+                              )}
                             </p>
                           </div>
                         ))}
