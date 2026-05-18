@@ -17,6 +17,18 @@ type Shift = {
   break_end_time: string | null;
 };
 
+function formatLocalDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getTodayDateString() {
+  return formatLocalDate(new Date());
+}
+
 function formatTime(time: string) {
   const [hours, minutes] = time.split(":");
 
@@ -65,9 +77,12 @@ export default function ManageSchedulePage() {
   const [success, setSuccess] = useState("");
 
   async function loadShifts() {
+    const today = getTodayDateString();
+
     const { data, error } = await supabase
       .from("shifts")
       .select("*")
+      .gte("shift_date", today)
       .order("shift_date", { ascending: true })
       .order("start_time", { ascending: true });
 
@@ -167,7 +182,7 @@ export default function ManageSchedulePage() {
     <ProtectedRoute requireAdmin>
       <DashboardLayout
         title="Manage Schedule"
-        subtitle="Edit, update, or remove existing employee shifts."
+        subtitle="Edit, update, or remove upcoming employee shifts."
         roleLabel="Super User"
       >
         {error && (
@@ -185,17 +200,17 @@ export default function ManageSchedulePage() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 p-6">
             <h2 className="text-lg font-semibold text-slate-900">
-              Scheduled Shifts
+              Upcoming Scheduled Shifts
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Edit or delete shifts from the schedule.
+              Only today and future shifts are displayed here.
             </p>
           </div>
 
           <div className="divide-y divide-slate-100">
             {shifts.length === 0 ? (
               <p className="p-6 text-sm text-slate-500">
-                No shifts have been created yet.
+                No upcoming shifts have been created yet.
               </p>
             ) : (
               shifts.map((shift) => {
